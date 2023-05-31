@@ -1,0 +1,21 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-kafka
+  namespace: kafka-example
+  labels:
+    app: example-kafka
+spec:
+  ports:
+    - name: external
+      protocol: TCP
+      port: 9093
+      targetPort: 9093
+    - name: internal
+      protocol: TCP
+      port: 9092
+      targetPort: 9092
+  selector:
+    app: example-kafka
+  type: ClusterIP
+  sessionAffinity: None

@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: example-zookeeper
+  namespace: kafka-example
+  labels:
+    app: example-zookeeper
+spec:
+  ports:
+    - name: main
+      protocol: TCP
+      port: 2181
+      targetPort: 2181
+  selector:
+    app: example-zookeeper
+  type: ClusterIP
+  sessionAffinity: None

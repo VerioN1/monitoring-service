@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: example-zookeeper
+  namespace: kafka-example
+  labels:
+    app: example-zookeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-zookeeper
+  template:
+    metadata:
+      labels:
+        app: example-zookeeper
+    spec:
+      containers:
+        - name: example-zookeeper
+          image: zookeeper:3.5.9
+          ports:
+            - containerPort: 2181
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      enableServiceLinks: true
+  strategy:
+    type: RollingUpdate
