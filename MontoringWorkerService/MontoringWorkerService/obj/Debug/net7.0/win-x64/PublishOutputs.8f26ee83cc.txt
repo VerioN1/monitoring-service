@@ -1,0 +1,4 @@
+C:\Users\alonb\Desktop\MoniService\appsettings.Development.json
+C:\Users\alonb\Desktop\MoniService\appsettings.json
+C:\Users\alonb\Desktop\MoniService\MontoringWorkerService.pdb
+C:\Users\alonb\Desktop\MoniService\MontoringWorkerService.exe
