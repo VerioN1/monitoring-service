@@ -49,6 +49,11 @@ public class Worker : BackgroundService
                 var errorMessagesObj = results.Where(result => result.Type == MessageTypes.Error);
                 if (errorMessagesObj.ToList().Count == 0)
                 {
+                    if (lastEmailSent is not null)
+                    {
+                        lastEmailSent = null;
+                        SendMailToWarn("SUCCESS - ALL SERVICES ARE FIXED!", "all systems are up and running on apps.varcode.com");
+                    }
                     _logger.LogInformation("Done health check, ALL O.K");
                     lastEmailSent = null;
                 }
@@ -56,22 +61,26 @@ public class Worker : BackgroundService
                 {
                     if (lastEmailSent is null)
                     {
-                        lastEmailSent = DateTime.Now;
+                        string message = errorMessagesObj
+                            .Select(result => result.Message)
+                            .Aggregate((i, j) => i + '\n' + j );
+                        SendMailToWarn("WARNING - SERVICE CRASHED!", message);
                         _logger.LogError("Done health check, server didn't responded in time! check apps.varcode.com");
-                        await Task.Delay(1000 * 60 * 5, stoppingToken);
+                        lastEmailSent = DateTime.Now;
                         continue;
                     }
                     
                     var now = DateTime.Now;
-                    if (lastEmailSent.HasValue && lastEmailSent.Value.AddMinutes(19) < now)
+                    if (lastEmailSent.HasValue && lastEmailSent.Value.AddMinutes(19) > now)
                     {
                         lastEmailSent = null;
                     }
-                    string message = errorMessagesObj
-                        .Select(result => result.Message)
-                        .Aggregate((i, j) => i + '\n' + j );
-                    SendMailToWarn(message);
-                    _logger.LogError("Done health check, server didn't responded in time! check apps.varcode.com");
+                    else
+                    {
+                        await Task.Delay(1000 * 60 * 5, stoppingToken);
+                        continue;
+                    }
+                   
                 }
 
             }
@@ -84,7 +93,7 @@ public class Worker : BackgroundService
         }
     }
 
-    private void SendMailToWarn(string message)
+    private void SendMailToWarn(string subject, string message)
     {
         try
         {
@@ -95,8 +104,8 @@ public class Worker : BackgroundService
             {
                 mailMessage.To.Add(new MailboxAddress(recipient.Name, recipient.Address));
             }
-           
-            mailMessage.Subject = "WARNING - SERVICE CRASHED!";
+
+            mailMessage.Subject = subject;
             mailMessage.Body = new TextPart(TextFormat.Plain)
             {
                 Text = message
